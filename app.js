@@ -12,6 +12,7 @@ var express                 = require('express');
     User                    = require('./models/user'),
     seedDB                  = require('./seeds');
     port                    = process.env.PORT || 3007;
+    url                     = process.env.DATABASEURL || "mongodb://localhost:27017/yelp_camp"
 
 //requiring routes
 var commentRoutes = require("./routes/comments"),
@@ -20,7 +21,8 @@ var commentRoutes = require("./routes/comments"),
 
 
 // mongoose.connect("mongodb://localhost:27017/yelp_camp",{useNewUrlParser: true});
-mongoose.connect("mongodb+srv://Monika:Monika@clustertest-aqjrn.mongodb.net/test?retryWrites=true&w=majority",{useNewUrlParser: true});
+// mongoose.connect("mongodb+srv://Monika:Monika@clustertest-aqjrn.mongodb.net/test?retryWrites=true&w=majority",{useNewUrlParser: true});
+mongoose.connect(url, {useNewUrlParser: true});
 
 
 app.use(bodyParser.urlencoded({extended: true}));
