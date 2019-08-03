@@ -3,6 +3,7 @@ var express                 = require('express');
     request                 = require('request');
     bodyParser              = require('body-parser');
     mongoose                = require('mongoose');
+    mongodb                 = require('mongodb'),
     methodOverride          = require('method-override'),
     passport                = require('passport'),
     LocalStrategy           = require('passport-local'),
@@ -22,7 +23,8 @@ var commentRoutes = require("./routes/comments"),
 
 // mongoose.connect("mongodb://localhost:27017/yelp_camp",{useNewUrlParser: true});
 // mongoose.connect("mongodb+srv://Monika:Monika@clustertest-aqjrn.mongodb.net/test?retryWrites=true&w=majority",{useNewUrlParser: true});
-mongoose.connect(url, {useNewUrlParser: true});
+// mongoose.connect(url, {useNewUrlParser: true});
+mongodb.MongoClient.connect(url, {useNewUrlParser: true});
 
 
 app.use(bodyParser.urlencoded({extended: true}));
