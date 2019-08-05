@@ -2,15 +2,17 @@ var express                 = require('express');
     app                     = express();
     request                 = require('request');
     bodyParser              = require('body-parser');
+    cookieParser            = require('cookie-parser'),
     mongoose                = require('mongoose');
-    // mongodb                 = require('mongodb'),
     methodOverride          = require('method-override'),
     passport                = require('passport'),
     LocalStrategy           = require('passport-local'),
     passportLocalMongoose   = require("passport-local-mongoose"),
+    flash                   = require('connect-flash'),
     Campground              = require('./models/campground');
     Comment                 = require('./models/comment');
     User                    = require('./models/user'),
+    session                 = require('express-session'),
     seedDB                  = require('./seeds');
     port                    = process.env.PORT || 3007;
     url                     = process.env.DATABASEURL || "mongodb://localhost:27017/yelp_camp"
@@ -24,13 +26,13 @@ var commentRoutes = require("./routes/comments"),
 // mongoose.connect("mongodb://localhost:27017/yelp_camp",{useNewUrlParser: true});
 // mongoose.connect("mongodb+srv://Monika:Monika@clustertest-aqjrn.mongodb.net/test?retryWrites=true&w=majority",{useNewUrlParser: true});
 mongoose.connect(url, {useNewUrlParser: true});
-// mongodb.MongoClient.connect(url, {useNewUrlParser: true});
 
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine","ejs");
 app.use(express.static(__dirname + "/public"));
 app.use(methodOverride("_method"));
+app.use(cookieParser('secret'));
 seedDB();
 
 
@@ -41,6 +43,7 @@ app.use(require("express-session")({
     saveUninitialized: false
 }));
 
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -51,6 +54,8 @@ passport.deserializeUser(User.deserializeUser());
 
 app.use(function(req, res, next){
     res.locals.currentUser = req.user;
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
     next();
 });
 

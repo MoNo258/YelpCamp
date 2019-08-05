@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var Campground = require("../models/campground");
+var middleware = require('../middleware');
 var request = require("request");
 
 
@@ -69,7 +70,7 @@ router.get("/", function(req,res){
 });
 
 //CREATE - add new campground to DB
-router.post("/", isLoggedIn, function(req, res){
+router.post("/", middleware.isLoggedIn, function(req, res){
     // get data from form and add to campgrounds array
     var name = req.body.name;
     var image = req.body.image;
@@ -91,7 +92,7 @@ router.post("/", isLoggedIn, function(req, res){
 });
 
 //NEW - show form to create new campground
-router.get("/new", isLoggedIn, function(req, res){
+router.get("/new", middleware.isLoggedIn, function(req, res){
     res.render("campgrounds/new");
 });
 
@@ -109,7 +110,7 @@ router.get("/:id", function(req, res){
 });
 
 // EDIT route
-router.get("/:id/edit", checkCampgroundOwnership, function(req, res){
+router.get("/:id/edit", middleware.checkUserCampground, function(req, res){
     Campground.findById(req.params.id, function(err, foundCampground){
         if(err){
             console.log(err);
@@ -122,14 +123,15 @@ router.get("/:id/edit", checkCampgroundOwnership, function(req, res){
 
 //UPDATE route
 router.put("/:id", checkCampgroundOwnership, function(req, res){
-    // var newData = {name: req.body.name, image: req.body.image, description: req.body.desc};
+    var newData = {name: req.body.name, image: req.body.image, description: req.body.desc};
     Campground.findByIdAndUpdate(req.params.id, 
-        {name: req.body.name, image: req.body.image, description: req.body.desc},
-        function(err, updatedCampground){
+        {$set: newData}, function(err, campground){
         if(err){
-            res.redirect("/campgrounds");
+            req.flash("error", err.message)
+            res.redirect("back");
         } else {
-            res.redirect("/campgrounds/" + req.params.id);
+            req.flash("success", "Successfully updated")
+            res.redirect("/campgrounds/" + campground._id);
         }
     });
 });
@@ -145,12 +147,12 @@ router.delete("/:id", checkCampgroundOwnership, function(req, res){
     });
 });
 
-function isLoggedIn(req, res, next){
-    if(req.isAuthenticated()){
-        return next();
-    }
-    res.redirect("/login");
-};
+// function isLoggedIn(req, res, next){
+//     if(req.isAuthenticated()){
+//         return next();
+//     }
+//     res.redirect("/login");
+// };
 
 function checkCampgroundOwnership(req, res, next){
     if(req.isAuthenticated()){
